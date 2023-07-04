@@ -1,0 +1,150 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><link rel="icon" href="data:">
+<title>VR 福井県立恐竜博物館 外観</title>
+<script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+<script src="https://rawgit.com/fernandojsg/aframe-teleport-controls/master/dist/aframe-teleport-controls.min.js"></script>
+
+<!--
+-->
+<script type="module" src="https://code4fukui.github.io/glb-viewer/mc-controls.js"></script>
+
+<script type="module">
+//help.innerHTML = "操作方法: カーソルで移動、マウスで視点変更、スペースキーで上昇、シフトキーで下降 (<a href=https://code4fukui.github.io/vr-fukui/vr-view.html#img/vr-jomon-museum.jpg>上空360度写真</a>、<a href=https://github.com/code4fukui/vr-jomon-museum>src on GitHub</a>)";
+help.innerHTML = "<a href=https://www.dinosaur.pref.fukui.jp/>福井県立恐竜博物館</a> 矢印タップで移動 (<a href=https://github.com/code4fukui/vr-dinosaur-museum>VR src</a>)";
+</script>
+
+<style>
+#help {
+  position: absolute;
+  background-color: white;
+  border: 2px solid black;
+  padding: .3em;
+  color: black;
+  z-index: 30;
+  margin: .5em;
+}
+a {
+  color: black !important;
+}
+</style>
+  
+</head>
+
+<body>
+
+<div id="help"></div>
+
+<a-scene id="scene" background="color: #4080e0" renderer="colorManagement: true" vr-mode-ui="enabled: false">
+  <a-assets timeout="10000">
+    <a-asset-item id="base-asset" src="./fukui-dinosaur-museum.glb"></a-asset-item>
+    <a-asset-item id="arrow-asset" src="./arrow.glb"></a-asset-item>
+    <!--<a-asset-item id="cake-asset" src="./kono-guide.glb"></a-asset-item>-->
+  </a-assets>
+
+  <a-entity id="base" gltf-model="#base-asset" scale="100 100 100" position="-20 -10 -20" rotation="0 -40 0"></a-entity>
+
+  <!-- org
+  <a-entity id="arrow" gltf-model="#arrow-asset" position="0 20 0" scale="2 2 2" rotation="0 0 180"
+    animation="property: position; to: 0 14 0; dur: 500; easing: easeInSine; loop: true; dir: alternate"
+  ></a-entity>
+  -->
+  <a-entity id="arrow" gltf-model="#arrow-asset" position="0 15 10" scale="2 2 2" rotation="0 0 180"
+    animation="property: position; to: 0 14 10; dur: 500; easing: easeInSine; loop: true; dir: alternate"
+  ></a-entity>
+
+  <a-entity id="arrow2" gltf-model="#arrow-asset" position="-32 15 -55" scale="2 2 2" rotation="0 0 180"
+    animation="property: position; to: -32 14 -55; dur: 500; easing: easeInSine; loop: true; dir: alternate"
+  ></a-entity>
+
+  <a-entity id="arrow3" gltf-model="#arrow-asset" position="14 10 -22" scale="2 2 2" rotation="0 0 180"
+  animation="property: position; to: 14 9 -22; dur: 500; easing: easeInSine; loop: true; dir: alternate"
+  ></a-entity>
+
+  <!--
+  <a-entity id="cake" gltf-model="#cake-asset" position="-1.1 .48 3" scale="1 1 1"></a-entity>
+  -->
+  <a-entity light="type: ambient; color: #FFF"></a-entity>
+
+    <!--<a-plane color="#888" height="300" width="300" rotation="-90 0 0"></a-plane>-->
+    <!-- <a-sphere id="sphere" color="#f22"></a-sphere> -->
+  <a-entity id="cameraRig" position="0 0 0" rotation="0 0 0">
+    <a-entity id="head" camera position="-0.12 1.7 27.0" x-mc-controls x-look-controls>
+      <a-entity cursor="rayOrigin: mouse"></a-entity>
+    </a-entity>
+    <a-entity oculus-touch-controls="hand:left" teleport-controls="button:trigger; collisionEntities:.collidable; cameraRig:#cameraRig; teleportOrigin:#head;"></a-entity>
+    <a-entity oculus-touch-controls="hand:right" teleport-controls="button:trigger; collisionEntities:.collidable; cameraRig:#cameraRig; teleportOrigin:#head;"></a-entity>
+  </a-entity>
+</a-scene>
+<script type="module">
+/*
+arrow.onclick = () => {
+  head.setAttribute("position", { x: -2.1, y: 163, z: 11.1 });
+  alert(3);
+};
+*/
+import { sleep } from "https://js.sabae.cc/sleep.js";
+
+const distance = (p1, p2) => {
+  const dx = p1.x - p2.x;
+  const dy = p1.y - p2.y;
+  const dz = p1.z - p2.z;
+  return Math.sqrt(dx * dx + dy * dy + dz * dz);
+};
+const easeCos = (x) => (Math.sin(x * Math.PI - Math.PI / 2) + 1) / 2;
+const easeLinear = (x) => x;
+let moving = false;
+const move = async (pos, rot) => {
+  if (moving) return;
+  moving = true;
+  const p = head.getAttribute("position");
+  const orgp = { x: p.x, y: p.y, z: p.z };
+  const r = head.getAttribute("rotation");
+  const orgr = { x: r.x, y: r.y, z: r.z };
+  const len = distance(orgp, pos);
+  //const frames = Math.floor(len * 1.5);
+  const frames = 60 * 1.5;
+  //console.log(frames);
+  const ease = easeCos;
+  //const ease = easeLinear;
+  for (let i = 1; i <= frames; i++) {
+    await sleep(1000 / 60);
+    const t = ease(i / frames);
+    //console.log(i / frames, t);
+    const px = orgp.x + (pos.x - orgp.x) * t;
+    const py = orgp.y + (pos.y - orgp.y) * t;
+    const pz = orgp.z + (pos.z - orgp.z) * t;
+    const rx = orgr.x + (rot.x - orgr.x) * t;
+    const ry = orgr.y + (rot.y - orgr.y) * t;
+    const rz = orgr.z + (rot.z - orgr.z) * t;
+    head.setAttribute("position", { x: px, y: py, z: pz });
+    head.setAttribute("rotation", { x: rx, y: ry, z: rz });
+  }
+  moving = false;
+};
+arrow.onclick = () => {
+  move(
+    {x: -0.12, y: 1.7, z: 27.0 },
+    {x: 0, y: 0, z: 0}
+  );
+};
+arrow2.onclick = () => {
+  move(
+    {x: -53.14113748689668, y: 20.901519976103835, z: -65.5521762111108},
+    {x: -26.012283898939383, y: 232.3916817050599, z: 0},
+  );
+};
+arrow3.onclick = () => {
+  move(
+    {x: 40.26300009190443, y: 21.27414736277575, z: -25.482015503172747},
+    {x: -29.10625599264584, y: 79.52654196415833, z: 0},
+  );
+};
+document.body.onkeydown = (e) => {
+  if (e.keyCode == 13) {
+    console.log(head.getAttribute("position"), head.getAttribute("rotation"))
+  }
+};
+
+</script>
+
+</body>
+</html>
