@@ -1,0 +1,60 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><link rel="icon" href="data:">
+<title>VR 福井県立恐竜博物館 野外 TREX</title>
+<script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+<script src="https://rawgit.com/fernandojsg/aframe-teleport-controls/master/dist/aframe-teleport-controls.min.js"></script>
+
+<!--
+-->
+<script type="module" src="https://code4fukui.github.io/glb-viewer/mc-controls.js"></script>
+
+<script type="module">
+//help.innerHTML = "操作方法: カーソルで移動、マウスで視点変更、スペースキーで上昇、シフトキーで下降 (<a href=https://code4fukui.github.io/vr-fukui/vr-view.html#img/vr-jomon-museum.jpg>上空360度写真</a>、<a href=https://github.com/code4fukui/vr-jomon-museum>src on GitHub</a>)";
+help.innerHTML = "<a href=https://www.dinosaur.pref.fukui.jp/>福井県立恐竜博物館</a> TREX / <a href=./dinosaur-trex.usdz>ARで見る on iOS</a> (<a href=https://github.com/code4fukui/vr-dinosaur-museum>VR src</a>)";
+</script>
+
+<style>
+#help {
+  position: absolute;
+  background-color: white;
+  border: 2px solid black;
+  padding: .3em;
+  color: black;
+  z-index: 30;
+  margin: .5em;
+}
+a {
+  color: black !important;
+}
+</style>
+  
+</head>
+
+<body>
+
+<div id="help"></div>
+
+<a-scene id="scene" background="color: #222" renderer="colorManagement: true" vr-mode-ui="enabled: false">
+  <a-assets timeout="10000">
+    <a-asset-item id="base-asset" src="./dinosaur-trex.glb"></a-asset-item>
+  </a-assets>
+
+  <a-entity id="base" gltf-model="#base-asset" scale="10 10 10" position="0 0 -5" rotation="0 0 0"
+  animation="property: rotation; to: 0 360 0; dur: 15000; easing: linear; loop: true"
+  ></a-entity>
+
+  <a-entity light="type: ambient; color: #FFF"></a-entity>
+
+    <!--<a-plane color="#888" height="300" width="300" rotation="-90 0 0"></a-plane>-->
+    <!-- <a-sphere id="sphere" color="#f22"></a-sphere> -->
+  <a-entity id="cameraRig" position="0 0 0" rotation="0 0 0">
+    <a-entity id="head" camera position="0 1.7 0" mc-controls look-controls>
+      <a-entity cursor="rayOrigin: mouse"></a-entity>
+    </a-entity>
+    <a-entity oculus-touch-controls="hand:left" teleport-controls="button:trigger; collisionEntities:.collidable; cameraRig:#cameraRig; teleportOrigin:#head;"></a-entity>
+    <a-entity oculus-touch-controls="hand:right" teleport-controls="button:trigger; collisionEntities:.collidable; cameraRig:#cameraRig; teleportOrigin:#head;"></a-entity>
+  </a-entity>
+</a-scene>
+
+
+</body>
+</html>
